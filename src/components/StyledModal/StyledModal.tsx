@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { ButtonGroup, CloseButton, ModalButton, ModalContent, Modal as ModalWrapper, Text } from '../../App.styled';
+import { ButtonGroup, CloseButton, ModalButton, ModalContent, Modal, Text } from './StyledModal.styled';
 
 interface ModalProps {
     isOpen: boolean;
@@ -13,7 +13,7 @@ interface ModalProps {
     }[];
 }
 
-export const Modal: React.FC<ModalProps> = ({
+export const StyledModal: React.FC<ModalProps> = ({
     isOpen,
     onClose,
     title,
@@ -23,7 +23,7 @@ export const Modal: React.FC<ModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <ModalWrapper>
+        <Modal>
             <ModalContent>
                 <CloseButton onClick={onClose}>×</CloseButton>
                 <Text>{title}</Text>
@@ -42,6 +42,6 @@ export const Modal: React.FC<ModalProps> = ({
                     </ButtonGroup>
                 )}
             </ModalContent>
-        </ModalWrapper>
+        </Modal>
     );
 }; 

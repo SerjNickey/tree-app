@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button, ButtonContainer, Container, NodeContainer, Title } from './App.styled';
-import { Modal as ModalComponent } from './components/Modal/Modal';
+import { StyledModal } from './components/StyledModal/StyledModal';
 import { StyledInput } from './components/StyledInput/StyledInput';
 import { testTree } from './mocks/test';
 
@@ -163,7 +163,7 @@ export const App = () => {
     <>
       {renderNode(tree)}
 
-      <ModalComponent
+      <StyledModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         title={isEditing ? 'Редактировать элемент' : 'Добавить дочерний элемент'}
@@ -187,9 +187,9 @@ export const App = () => {
           onChange={(e) => setNodeName(e.target.value)}
           style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
         />
-      </ModalComponent>
+      </StyledModal>
 
-      <ModalComponent
+      <StyledModal
         isOpen={isDeleteModalOpen}
         onClose={handleCloseDeleteModal}
         title="Вы уверены, что хотите удалить этот элемент?"
