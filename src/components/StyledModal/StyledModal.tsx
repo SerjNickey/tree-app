@@ -1,5 +1,12 @@
-import React, { ReactNode } from 'react';
-import { ButtonGroup, CloseButton, ModalButton, ModalContent, Modal, Text } from './StyledModal.styled';
+import React, { ReactNode } from "react";
+import {
+    ButtonGroup,
+    CloseButton,
+    ModalButton,
+    ModalContent,
+    Modal,
+    Text,
+} from "./StyledModal.styled";
 
 interface ModalProps {
     isOpen: boolean;
@@ -9,7 +16,7 @@ interface ModalProps {
     actions?: {
         label: string;
         onClick: () => void;
-        variant?: 'cancel' | 'add';
+        variant?: "cancel" | "add";
     }[];
 }
 
@@ -18,7 +25,7 @@ export const StyledModal: React.FC<ModalProps> = ({
     onClose,
     title,
     children,
-    actions = []
+    actions = [],
 }) => {
     if (!isOpen) return null;
 
@@ -33,7 +40,7 @@ export const StyledModal: React.FC<ModalProps> = ({
                         {actions.map((action, index) => (
                             <ModalButton
                                 key={index}
-                                className={action.variant || 'add'}
+                                className={action.variant || "add"}
                                 onClick={action.onClick}
                             >
                                 {action.label}
@@ -44,4 +51,4 @@ export const StyledModal: React.FC<ModalProps> = ({
             </ModalContent>
         </Modal>
     );
-}; 
+};

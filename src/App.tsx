@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button, ButtonContainer, Container, NodeContainer, Title } from './App.styled';
 import { StyledModal } from './components/StyledModal/StyledModal';
 import { StyledInput } from './components/StyledInput/StyledInput';
-import { testTree } from './mocks/test';
+import { useGetTreeQuery } from './services/api';
 
 interface TreeNode {
   id: string | number;
@@ -17,7 +17,12 @@ export const App = () => {
   const [selectedNodeId, setSelectedNodeId] = useState<string | number | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [expandedNodes, setExpandedNodes] = useState<Set<string | number>>(new Set())
-  const [tree, setTree] = useState<TreeNode>(testTree)
+
+  const { data: tree, isLoading } = useGetTreeQuery()
+
+  if (!tree) {
+    return <div>Загрузка...</div>
+  }
 
   const handleOpenModal = (nodeId: string | number, isEdit: boolean = false) => {
     setSelectedNodeId(nodeId)
@@ -161,7 +166,11 @@ export const App = () => {
 
   return (
     <>
-      {renderNode(tree)}
+      {isLoading ? (
+        <div>Загрузка...</div>
+      ) : (
+        renderNode(tree)
+      )}
 
       <StyledModal
         isOpen={isModalOpen}

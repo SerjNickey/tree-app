@@ -1,19 +1,25 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
-interface Item {
-    id: number
-    title: string
-    // добавьте другие поля в соответствии с вашим API
+interface TreeNode {
+  id: string | number;
+  name: string;
+  children: TreeNode[];
 }
 
 export const api = createApi({
-    reducerPath: 'api',
-    baseQuery: fetchBaseQuery({ baseUrl: 'https://api.example.com' }), // замените на ваш URL
-    endpoints: (builder) => ({
-        getItems: builder.query<Item[], void>({
-            query: () => 'items', // замените на ваш endpoint
-        }),
-    }),
+  baseQuery: fetchBaseQuery({ 
+    baseUrl: 'https://test.vmarmysh.com' 
+  }),
+  endpoints: (builder) => ({
+    getTree: builder.query<TreeNode, void>({
+      query: () => ({
+        url: '/api.user.tree.get',
+        params: {
+          treeName: '{C9232B85-AD10-459C-A44F-70CA30C60E5F}'
+        }
+      })
+    })
+  })
 })
 
-export const { useGetItemsQuery } = api
+export const { useGetTreeQuery } = api 
