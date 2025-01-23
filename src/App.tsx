@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Button, ButtonContainer, Container, NodeContainer, StyledInput, Title } from './App.styled';
+import { Button, ButtonContainer, Container, NodeContainer, Title } from './App.styled';
 import { Modal as ModalComponent } from './components/Modal/Modal';
+import { StyledInput } from './components/StyledInput/StyledInput';
 import { testTree } from './mocks/test';
 
 interface TreeNode {
