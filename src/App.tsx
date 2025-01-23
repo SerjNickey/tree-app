@@ -16,7 +16,7 @@ export const App = () => {
   const [nodeName, setNodeName] = useState('')
   const [selectedNodeId, setSelectedNodeId] = useState<string | number | null>(null)
   const [isEditing, setIsEditing] = useState(false)
-  const [expandedNodes, setExpandedNodes] = useState<Set<string | number>>(new Set([1]))
+  const [expandedNodes, setExpandedNodes] = useState<Set<string | number>>(new Set())
   const [tree, setTree] = useState<TreeNode>(testTree)
 
   const handleOpenModal = (nodeId: string | number, isEdit: boolean = false) => {
@@ -119,7 +119,14 @@ export const App = () => {
     setExpandedNodes(prev => {
       const newSet = new Set(prev)
       if (newSet.has(nodeId)) {
-        newSet.delete(nodeId)
+        const nodeToClose = findNode(tree, nodeId)
+        if (nodeToClose) {
+          const removeChildrenIds = (node: TreeNode) => {
+            newSet.delete(node.id)
+            node.children.forEach(child => removeChildrenIds(child))
+          }
+          removeChildrenIds(nodeToClose)
+        }
       } else {
         newSet.add(nodeId)
       }
@@ -136,7 +143,7 @@ export const App = () => {
         </Title>
         <ButtonContainer>
           <Button onClick={() => handleOpenModal(node.id)}>AddChildren</Button>
-          {node.id !== 'root' && (
+          {node.id !== 1 && node.id !== 'root' && (
             <>
               <Button onClick={() => handleOpenModal(node.id, true)}>EditName</Button>
               <Button onClick={() => handleOpenDeleteModal(node.id)}>DeleteChildren</Button>
@@ -178,6 +185,7 @@ export const App = () => {
           placeholder="Node Name"
           value={nodeName}
           onChange={(e) => setNodeName(e.target.value)}
+          style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
         />
       </ModalComponent>
 
