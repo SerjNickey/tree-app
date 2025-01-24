@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import { RootContainer, Button, ButtonContainer, Container, NodeContainer, Title, Card } from './App.styled';
+import { RootContainer, Button, ButtonContainer, Container, NodeContainer, Title } from './App.styled';
 import { StyledModal } from './components/StyledModal/StyledModal';
 import { StyledInput } from './components/StyledInput/StyledInput';
 import { useGetTreeQuery, useDeleteNodeMutation, useCreateNodeMutation, useRenameNodeMutation } from './services/api';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 interface TreeNode {
   id: string | number;
@@ -184,11 +187,17 @@ export const App = () => {
           {node.id === 736 ? 'Root' : node.name}
         </Title>
         <ButtonContainer>
-          <Button onClick={() => handleOpenModal(node.id)}>Add</Button>
+          <Button onClick={() => handleOpenModal(node.id)}>
+            <AddIcon fontSize="small" />
+          </Button>
           {node.id !== 736 && node.id !== 'root' && (
             <>
-              <Button onClick={() => handleOpenModal(node.id, true)}>Rename</Button>
-              <Button onClick={() => handleOpenDeleteModal(node.id)}>Delete</Button>
+              <Button onClick={() => handleOpenModal(node.id, true)}>
+                <EditIcon fontSize="small" />
+              </Button>
+              <Button onClick={() => handleOpenDeleteModal(node.id)}>
+                <DeleteIcon fontSize="small" />
+              </Button>
             </>
           )}
         </ButtonContainer>

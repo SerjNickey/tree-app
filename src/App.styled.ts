@@ -47,16 +47,18 @@ export const StyledInput = styled.input`
 `;
 
 export const Button = styled.button`
-  background-color: #646cff;
-  color: white;
+  background: transparent;
   border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
+  padding: 4px;
   cursor: pointer;
-  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
 
-  &:hover {
-    background-color: #535bf2;
+  &:focus {
+    outline: none;
   }
 `;
 
