@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button, ButtonContainer, Container, NodeContainer, Title } from './App.styled';
 import { StyledModal } from './components/StyledModal/StyledModal';
 import { StyledInput } from './components/StyledInput/StyledInput';
-import { useGetTreeQuery } from './services/api';
+import { useGetTreeQuery, useDeleteNodeMutation } from './services/api';
 
 interface TreeNode {
   id: string | number;
@@ -18,7 +18,8 @@ export const App = () => {
   const [isEditing, setIsEditing] = useState(false)
   const [expandedNodes, setExpandedNodes] = useState<Set<string | number>>(new Set())
 
-  const { data: tree, isLoading } = useGetTreeQuery()
+  const { data: tree, isLoading, refetch } = useGetTreeQuery()
+  const [deleteNodeMutation] = useDeleteNodeMutation()
 
   if (!tree) {
     return <div>Загрузка...</div>
@@ -88,12 +89,12 @@ export const App = () => {
     }
   }
 
-  const deleteNode = (currentNode: TreeNode, nodeId: string | number): TreeNode => {
+  const removeNodeFromTree = (currentNode: TreeNode, nodeId: string | number): TreeNode => {
     return {
       ...currentNode,
       children: currentNode.children
         .filter(child => child.id !== nodeId)
-        .map(child => deleteNode(child, nodeId))
+        .map(child => removeNodeFromTree(child, nodeId))
     }
   }
 
@@ -114,10 +115,15 @@ export const App = () => {
     handleCloseModal()
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!selectedNodeId) return;
-    setTree(prevTree => deleteNode(prevTree, selectedNodeId))
-    handleCloseDeleteModal()
+    try {
+      await deleteNodeMutation({ nodeId: selectedNodeId }).unwrap()
+      await refetch()
+      handleCloseDeleteModal()
+    } catch (error) {
+      console.error('Ошибка при удалении узла:', error)
+    }
   }
 
   const toggleNode = (nodeId: string | number) => {
