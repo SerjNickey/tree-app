@@ -26,7 +26,7 @@ export const App = () => {
   const [renameNode] = useRenameNodeMutation()
 
   if (!tree) {
-    return <div>Загрузка...</div>
+    return <div>Loading...</div>
   }
 
   const handleOpenModal = (nodeId: string | number, isEdit: boolean = false) => {
@@ -103,7 +103,7 @@ export const App = () => {
   }
 
   const handleError = (error: any) => {
-    setErrorMessage(error?.data?.message || 'Произошла ошибка. Попробуйте позже.')
+    setErrorMessage(error?.data?.data?.message || 'You have an error. Try again later.')
     setIsErrorModalOpen(true)
     setIsModalOpen(false)
     setIsDeleteModalOpen(false)
@@ -181,14 +181,14 @@ export const App = () => {
       <Container>
         <Title onClick={() => toggleNode(node.id)} style={{ cursor: 'pointer' }}>
           {node.children.length > 0 && (expandedNodes.has(node.id) ? '▼ ' : '▶ ')}
-          {node.id === 1 ? 'Root' : node.name}
+          {node.id === 736 ? 'Root' : node.name}
         </Title>
         <ButtonContainer>
-          <Button onClick={() => handleOpenModal(node.id)}>AddChildren</Button>
-          {node.id !== 1 && node.id !== 'root' && (
+          <Button onClick={() => handleOpenModal(node.id)}>Add</Button>
+          {node.id !== 736 && node.id !== 'root' && (
             <>
-              <Button onClick={() => handleOpenModal(node.id, true)}>EditName</Button>
-              <Button onClick={() => handleOpenDeleteModal(node.id)}>DeleteChildren</Button>
+              <Button onClick={() => handleOpenModal(node.id, true)}>Rename</Button>
+              <Button onClick={() => handleOpenDeleteModal(node.id)}>Delete</Button>
             </>
           )}
         </ButtonContainer>
@@ -212,7 +212,7 @@ export const App = () => {
       <StyledModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        title={isEditing ? 'Редактировать элемент' : 'Добавить дочерний элемент'}
+        title={isEditing ? 'Rename' : 'Add'}
         actions={[
           {
             label: 'Cancel',
@@ -238,7 +238,7 @@ export const App = () => {
       <StyledModal
         isOpen={isDeleteModalOpen}
         onClose={handleCloseDeleteModal}
-        title="Вы уверены, что хотите удалить этот элемент?"
+        title="Are you sure you want to delete this node?"
         actions={[
           {
             label: 'Cancel',

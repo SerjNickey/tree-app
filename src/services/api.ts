@@ -16,7 +16,7 @@ export const api = createApi({
         url: '/api.user.tree.get',
         method: 'POST',
         params: {
-          treeName: '{C9232B85-AD10-459C-A44F-70CA30C60E5F}'
+          treeName: 'helltree'
         }
       })
     }),
@@ -25,7 +25,7 @@ export const api = createApi({
         url: '/api.user.tree.node.delete',
         method: 'POST',
         params: {
-          treeName: '{C9232B85-AD10-459C-A44F-70CA30C60E5F}',
+          treeName: 'helltree',
           nodeId
         }
       })
@@ -35,7 +35,7 @@ export const api = createApi({
         url: '/api.user.tree.node.create',
         method: 'POST',
         params: {
-          treeName: '{C9232B85-AD10-459C-A44F-70CA30C60E5F}',
+          treeName: 'helltree',
           parentNodeId,
           nodeName
         }
@@ -46,7 +46,7 @@ export const api = createApi({
         url: '/api.user.tree.node.rename',
         method: 'POST',
         params: {
-          treeName: '{C9232B85-AD10-459C-A44F-70CA30C60E5F}',
+          treeName: 'helltree',
           nodeId,
           newNodeName
         }
