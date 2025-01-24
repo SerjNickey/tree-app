@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button, ButtonContainer, Container, NodeContainer, Title } from './App.styled';
 import { StyledModal } from './components/StyledModal/StyledModal';
 import { StyledInput } from './components/StyledInput/StyledInput';
-import { useGetTreeQuery, useDeleteNodeMutation } from './services/api';
+import { useGetTreeQuery, useDeleteNodeMutation, useCreateNodeMutation } from './services/api';
 
 interface TreeNode {
   id: string | number;
@@ -20,6 +20,7 @@ export const App = () => {
 
   const { data: tree, isLoading, refetch } = useGetTreeQuery()
   const [deleteNodeMutation] = useDeleteNodeMutation()
+  const [createNode] = useCreateNodeMutation()
 
   if (!tree) {
     return <div>Загрузка...</div>
@@ -98,21 +99,20 @@ export const App = () => {
     }
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!nodeName.trim() || !selectedNodeId) return;
 
-    if (isEditing) {
-      setTree(prevTree => updateNodeName(prevTree, selectedNodeId, nodeName))
-    } else {
-      const newNode: TreeNode = {
-        id: Date.now().toString(),
-        name: nodeName,
-        children: []
+    try {
+      if (isEditing) {
+        // TODO: Добавить updateNode мутацию
+        setTree(prevTree => updateNodeName(prevTree, selectedNodeId, nodeName))
+      } else {
+        await handleCreate(nodeName)
       }
-      setTree(prevTree => addNodeToTree(prevTree, selectedNodeId, newNode))
-      setExpandedNodes(prev => new Set([...prev, selectedNodeId]))
+      handleCloseModal()
+    } catch (error) {
+      console.error('Ошибка при сохранении:', error)
     }
-    handleCloseModal()
   }
 
   const handleDelete = async () => {
@@ -123,6 +123,20 @@ export const App = () => {
       handleCloseDeleteModal()
     } catch (error) {
       console.error('Ошибка при удалении узла:', error)
+    }
+  }
+
+  const handleCreate = async (name: string) => {
+    if (!selectedNodeId) return;
+    try {
+      await createNode({
+        parentNodeId: selectedNodeId,
+        nodeName: name
+      }).unwrap()
+      await refetch()
+      // здесь можно добавить закрытие модального окна создания, если оно есть
+    } catch (error) {
+      console.error('Ошибка при создании узла:', error)
     }
   }
 
