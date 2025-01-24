@@ -17,6 +17,7 @@ interface ModalProps {
         label: string;
         onClick: () => void;
         variant?: "cancel" | "add";
+        disabled?: boolean;
     }[];
 }
 
@@ -42,6 +43,7 @@ export const StyledModal: React.FC<ModalProps> = ({
                                 key={index}
                                 className={action.variant || "add"}
                                 onClick={action.onClick}
+                                disabled={action.disabled}
                             >
                                 {action.label}
                             </ModalButton>

@@ -1,16 +1,22 @@
 import styled from "styled-components";
 
+export const RootContainer = styled.div`
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+`;
+
 export const Container = styled.div`
-  position: relative;
   display: flex;
   align-items: center;
-  padding: 5px;
+  justify-content: flex-start;
   gap: 10px;
+  padding: 5px 0;
 `;
 
 export const ButtonContainer = styled.div`
-  position: absolute;
-  left: 100%;
   display: flex;
   gap: 10px;
   margin-left: 10px;

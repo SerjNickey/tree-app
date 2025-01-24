@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, ButtonContainer, Container, NodeContainer, Title } from './App.styled';
+import { RootContainer, Button, ButtonContainer, Container, NodeContainer, Title, Card } from './App.styled';
 import { StyledModal } from './components/StyledModal/StyledModal';
 import { StyledInput } from './components/StyledInput/StyledInput';
 import { useGetTreeQuery, useDeleteNodeMutation, useCreateNodeMutation, useRenameNodeMutation } from './services/api';
@@ -202,7 +202,7 @@ export const App = () => {
   )
 
   return (
-    <>
+    <RootContainer>
       {isLoading ? (
         <div>Загрузка...</div>
       ) : (
@@ -222,7 +222,8 @@ export const App = () => {
           {
             label: isEditing ? 'Save' : 'Add',
             onClick: handleSave,
-            variant: 'add'
+            variant: 'add',
+            disabled: !nodeName.trim()
           }
         ]}
       >
@@ -267,7 +268,7 @@ export const App = () => {
       >
         {errorMessage}
       </StyledModal>
-    </>
+    </RootContainer>
   )
 }
 
