@@ -40,8 +40,24 @@ export const api = createApi({
           nodeName
         }
       })
+    }),
+    renameNode: builder.mutation<TreeNode, { nodeId: number | string, newNodeName: string }>({
+      query: ({ nodeId, newNodeName }) => ({
+        url: '/api.user.tree.node.rename',
+        method: 'POST',
+        params: {
+          treeName: '{C9232B85-AD10-459C-A44F-70CA30C60E5F}',
+          nodeId,
+          newNodeName
+        }
+      })
     })
   })
 })
 
-export const { useGetTreeQuery, useDeleteNodeMutation, useCreateNodeMutation } = api 
+export const { 
+  useGetTreeQuery, 
+  useDeleteNodeMutation, 
+  useCreateNodeMutation,
+  useRenameNodeMutation 
+} = api 

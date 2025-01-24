@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button, ButtonContainer, Container, NodeContainer, Title } from './App.styled';
 import { StyledModal } from './components/StyledModal/StyledModal';
 import { StyledInput } from './components/StyledInput/StyledInput';
-import { useGetTreeQuery, useDeleteNodeMutation, useCreateNodeMutation } from './services/api';
+import { useGetTreeQuery, useDeleteNodeMutation, useCreateNodeMutation, useRenameNodeMutation } from './services/api';
 
 interface TreeNode {
   id: string | number;
@@ -21,6 +21,7 @@ export const App = () => {
   const { data: tree, isLoading, refetch } = useGetTreeQuery()
   const [deleteNodeMutation] = useDeleteNodeMutation()
   const [createNode] = useCreateNodeMutation()
+  const [renameNode] = useRenameNodeMutation()
 
   if (!tree) {
     return <div>Загрузка...</div>
@@ -104,8 +105,7 @@ export const App = () => {
 
     try {
       if (isEditing) {
-        // TODO: Добавить updateNode мутацию
-        setTree(prevTree => updateNodeName(prevTree, selectedNodeId, nodeName))
+        await handleRename(selectedNodeId, nodeName)
       } else {
         await handleCreate(nodeName)
       }
@@ -139,6 +139,15 @@ export const App = () => {
       console.error('Ошибка при создании узла:', error)
     }
   }
+
+  const handleRename = async (nodeId: string | number, newNodeName: string) => {
+    try {
+      await renameNode({ nodeId, newNodeName }).unwrap();
+      await refetch();
+    } catch (error) {
+      console.error('Ошибка при переименовании узла:', error);
+    }
+  };
 
   const toggleNode = (nodeId: string | number) => {
     setExpandedNodes(prev => {
