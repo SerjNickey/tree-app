@@ -1,7 +1,11 @@
 import { useState } from 'react';
-import { Button, ButtonContainer, Container, NodeContainer, StyledInput, Title } from './App.styled';
-import { Modal as ModalComponent } from './components/Modal/Modal';
-import { testTree } from './mocks/test';
+import { RootContainer, Button, ButtonContainer, Container, NodeContainer, Title } from './App.styled';
+import { StyledModal } from './components/StyledModal/StyledModal';
+import { StyledInput } from './components/StyledInput/StyledInput';
+import { useGetTreeQuery, useDeleteNodeMutation, useCreateNodeMutation, useRenameNodeMutation } from './services/api';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 interface TreeNode {
   id: string | number;
@@ -12,11 +16,21 @@ interface TreeNode {
 export const App = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
   const [nodeName, setNodeName] = useState('')
   const [selectedNodeId, setSelectedNodeId] = useState<string | number | null>(null)
   const [isEditing, setIsEditing] = useState(false)
-  const [expandedNodes, setExpandedNodes] = useState<Set<string | number>>(new Set([1]))
-  const [tree, setTree] = useState<TreeNode>(testTree)
+  const [expandedNodes, setExpandedNodes] = useState<Set<string | number>>(new Set())
+
+  const { data: tree, isLoading, refetch } = useGetTreeQuery()
+  const [deleteNodeMutation] = useDeleteNodeMutation()
+  const [createNode] = useCreateNodeMutation()
+  const [renameNode] = useRenameNodeMutation()
+
+  if (!tree) {
+    return <div>Loading...</div>
+  }
 
   const handleOpenModal = (nodeId: string | number, isEdit: boolean = false) => {
     setSelectedNodeId(nodeId)
@@ -82,43 +96,82 @@ export const App = () => {
     }
   }
 
-  const deleteNode = (currentNode: TreeNode, nodeId: string | number): TreeNode => {
+  const removeNodeFromTree = (currentNode: TreeNode, nodeId: string | number): TreeNode => {
     return {
       ...currentNode,
       children: currentNode.children
         .filter(child => child.id !== nodeId)
-        .map(child => deleteNode(child, nodeId))
+        .map(child => removeNodeFromTree(child, nodeId))
     }
   }
 
-  const handleSave = () => {
+  const handleError = (error: any) => {
+    setErrorMessage(error?.data?.data?.message || 'You have an error. Try again later.')
+    setIsErrorModalOpen(true)
+    setIsModalOpen(false)
+    setIsDeleteModalOpen(false)
+  }
+
+  const handleSave = async () => {
     if (!nodeName.trim() || !selectedNodeId) return;
 
-    if (isEditing) {
-      setTree(prevTree => updateNodeName(prevTree, selectedNodeId, nodeName))
-    } else {
-      const newNode: TreeNode = {
-        id: Date.now().toString(),
-        name: nodeName,
-        children: []
+    try {
+      if (isEditing) {
+        await handleRename(selectedNodeId, nodeName)
+      } else {
+        await handleCreate(nodeName)
       }
-      setTree(prevTree => addNodeToTree(prevTree, selectedNodeId, newNode))
-      setExpandedNodes(prev => new Set([...prev, selectedNodeId]))
+      handleCloseModal()
+    } catch (error) {
+      handleError(error)
     }
-    handleCloseModal()
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!selectedNodeId) return;
-    setTree(prevTree => deleteNode(prevTree, selectedNodeId))
-    handleCloseDeleteModal()
+    try {
+      await deleteNodeMutation({ nodeId: selectedNodeId }).unwrap()
+      await refetch()
+      handleCloseDeleteModal()
+    } catch (error) {
+      handleError(error)
+    }
   }
+
+  const handleCreate = async (name: string) => {
+    if (!selectedNodeId) return;
+    try {
+      await createNode({
+        parentNodeId: selectedNodeId,
+        nodeName: name
+      }).unwrap()
+      await refetch()
+    } catch (error) {
+      handleError(error)
+    }
+  }
+
+  const handleRename = async (nodeId: string | number, newNodeName: string) => {
+    try {
+      await renameNode({ nodeId, newNodeName }).unwrap();
+      await refetch();
+    } catch (error) {
+      handleError(error);
+    }
+  };
 
   const toggleNode = (nodeId: string | number) => {
     setExpandedNodes(prev => {
       const newSet = new Set(prev)
       if (newSet.has(nodeId)) {
-        newSet.delete(nodeId)
+        const nodeToClose = findNode(tree, nodeId)
+        if (nodeToClose) {
+          const removeChildrenIds = (node: TreeNode) => {
+            newSet.delete(node.id)
+            node.children.forEach(child => removeChildrenIds(child))
+          }
+          removeChildrenIds(nodeToClose)
+        }
       } else {
         newSet.add(nodeId)
       }
@@ -131,14 +184,20 @@ export const App = () => {
       <Container>
         <Title onClick={() => toggleNode(node.id)} style={{ cursor: 'pointer' }}>
           {node.children.length > 0 && (expandedNodes.has(node.id) ? '▼ ' : '▶ ')}
-          {node.id === 1 ? 'Root' : node.name}
+          {node.id === 736 ? 'Root' : node.name}
         </Title>
         <ButtonContainer>
-          <Button onClick={() => handleOpenModal(node.id)}>AddChildren</Button>
-          {node.id !== 'root' && (
+          <Button onClick={() => handleOpenModal(node.id)}>
+            <AddIcon fontSize="small" />
+          </Button>
+          {node.id !== 736 && node.id !== 'root' && (
             <>
-              <Button onClick={() => handleOpenModal(node.id, true)}>EditName</Button>
-              <Button onClick={() => handleOpenDeleteModal(node.id)}>DeleteChildren</Button>
+              <Button onClick={() => handleOpenModal(node.id, true)}>
+                <EditIcon fontSize="small" />
+              </Button>
+              <Button onClick={() => handleOpenDeleteModal(node.id)}>
+                <DeleteIcon fontSize="small" />
+              </Button>
             </>
           )}
         </ButtonContainer>
@@ -152,13 +211,17 @@ export const App = () => {
   )
 
   return (
-    <>
-      {renderNode(tree)}
+    <RootContainer>
+      {isLoading ? (
+        <div>Загрузка...</div>
+      ) : (
+        renderNode(tree)
+      )}
 
-      <ModalComponent
+      <StyledModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        title={isEditing ? 'Редактировать элемент' : 'Добавить дочерний элемент'}
+        title={isEditing ? 'Rename' : 'Add'}
         actions={[
           {
             label: 'Cancel',
@@ -168,7 +231,8 @@ export const App = () => {
           {
             label: isEditing ? 'Save' : 'Add',
             onClick: handleSave,
-            variant: 'add'
+            variant: 'add',
+            disabled: !nodeName.trim()
           }
         ]}
       >
@@ -177,13 +241,14 @@ export const App = () => {
           placeholder="Node Name"
           value={nodeName}
           onChange={(e) => setNodeName(e.target.value)}
+          style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
         />
-      </ModalComponent>
+      </StyledModal>
 
-      <ModalComponent
+      <StyledModal
         isOpen={isDeleteModalOpen}
         onClose={handleCloseDeleteModal}
-        title="Вы уверены, что хотите удалить этот элемент?"
+        title="Are you sure you want to delete this node?"
         actions={[
           {
             label: 'Cancel',
@@ -197,7 +262,22 @@ export const App = () => {
           }
         ]}
       />
-    </>
+
+      <StyledModal
+        isOpen={isErrorModalOpen}
+        onClose={() => setIsErrorModalOpen(false)}
+        title={errorMessage}
+        actions={[
+          {
+            label: 'OK',
+            onClick: () => setIsErrorModalOpen(false),
+            variant: 'cancel'
+          }
+        ]}
+      >
+        {errorMessage}
+      </StyledModal>
+    </RootContainer>
   )
 }
 
