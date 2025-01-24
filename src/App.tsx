@@ -13,6 +13,8 @@ interface TreeNode {
 export const App = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
   const [nodeName, setNodeName] = useState('')
   const [selectedNodeId, setSelectedNodeId] = useState<string | number | null>(null)
   const [isEditing, setIsEditing] = useState(false)
@@ -100,6 +102,13 @@ export const App = () => {
     }
   }
 
+  const handleError = (error: any) => {
+    setErrorMessage(error?.data?.message || 'Произошла ошибка. Попробуйте позже.')
+    setIsErrorModalOpen(true)
+    setIsModalOpen(false)
+    setIsDeleteModalOpen(false)
+  }
+
   const handleSave = async () => {
     if (!nodeName.trim() || !selectedNodeId) return;
 
@@ -111,7 +120,7 @@ export const App = () => {
       }
       handleCloseModal()
     } catch (error) {
-      console.error('Ошибка при сохранении:', error)
+      handleError(error)
     }
   }
 
@@ -122,7 +131,7 @@ export const App = () => {
       await refetch()
       handleCloseDeleteModal()
     } catch (error) {
-      console.error('Ошибка при удалении узла:', error)
+      handleError(error)
     }
   }
 
@@ -134,9 +143,8 @@ export const App = () => {
         nodeName: name
       }).unwrap()
       await refetch()
-      // здесь можно добавить закрытие модального окна создания, если оно есть
     } catch (error) {
-      console.error('Ошибка при создании узла:', error)
+      handleError(error)
     }
   }
 
@@ -145,7 +153,7 @@ export const App = () => {
       await renameNode({ nodeId, newNodeName }).unwrap();
       await refetch();
     } catch (error) {
-      console.error('Ошибка при переименовании узла:', error);
+      handleError(error);
     }
   };
 
@@ -244,6 +252,21 @@ export const App = () => {
           }
         ]}
       />
+
+      <StyledModal
+        isOpen={isErrorModalOpen}
+        onClose={() => setIsErrorModalOpen(false)}
+        title={errorMessage}
+        actions={[
+          {
+            label: 'OK',
+            onClick: () => setIsErrorModalOpen(false),
+            variant: 'cancel'
+          }
+        ]}
+      >
+        {errorMessage}
+      </StyledModal>
     </>
   )
 }
